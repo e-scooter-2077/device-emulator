@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31613.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceEmulator", "DeviceEmulator\DeviceEmulator.csproj", "{FDBD8934-F7AD-48B0-8C73-C4DE81719B92}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FDBD8934-F7AD-48B0-8C73-C4DE81719B92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDBD8934-F7AD-48B0-8C73-C4DE81719B92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDBD8934-F7AD-48B0-8C73-C4DE81719B92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDBD8934-F7AD-48B0-8C73-C4DE81719B92}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0CF57335-FD6B-4562-B274-3143D8CEF718}
+	EndGlobalSection
+EndGlobal
