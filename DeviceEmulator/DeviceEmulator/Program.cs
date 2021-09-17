@@ -1,3 +1,6 @@
+using DeviceEmulator.Model.Data.Download;
+using DeviceEmulator.Web;
+using EasyDesk.CleanArchitecture.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -18,6 +21,9 @@ namespace DeviceEmulator
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.AddConfigAsSingleton<IotHubConfiguration>(hostContext.Configuration);
+                    services.AddSingleton<IotHubRegistryManager>();
+                    services.AddSingleton<EScooterApiManager>();
                     services.AddHostedService<Worker>();
                 });
     }
