@@ -7,6 +7,5 @@ using System.Threading.Tasks;
 
 namespace DeviceEmulator.Model.Emulation
 {
-    public record EScooterStatus(
-        EScooter Scooter, DateTime LastUpdate);
+    public record EScooterStatus(EScooter Scooter, DateTime LastUpdate);
 }
