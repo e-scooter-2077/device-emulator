@@ -43,7 +43,18 @@ namespace DeviceEmulator.Model.Emulation
 
         private EScooter ComputeEScooterUpdate(EScooter iotHubScooter, EScooterStatus previous)
         {
-            return iotHubScooter;
+            return new EScooter
+            {
+                Id = iotHubScooter.Id,
+                BatteryLevel = iotHubScooter.BatteryLevel,
+                Enabled = iotHubScooter.Enabled,
+                Locked = !iotHubScooter.Locked,
+                MaxSpeed = iotHubScooter.MaxSpeed,
+                PowerSavingThreshold = iotHubScooter.PowerSavingThreshold,
+                StandbyThreshold = iotHubScooter.StandbyThreshold,
+                UpdateFrequency = iotHubScooter.UpdateFrequency,
+                Position = iotHubScooter.Position
+            };
             throw new NotImplementedException();
         }
     }
