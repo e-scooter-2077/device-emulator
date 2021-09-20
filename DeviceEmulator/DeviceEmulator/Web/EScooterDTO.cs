@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace DeviceEmulator.Model.Data.Download
 {
-    public interface IEScooterDesiredProperties 
+    public interface IEScooterProperties 
     {
-        public Guid Id { get; }
         public bool? Locked { get; }
         public bool? Enabled { get; }
         public string UpdateFrequency { get; }
@@ -18,17 +17,15 @@ namespace DeviceEmulator.Model.Data.Download
     }
 
     public record EScooterDesiredDto(
-        Guid Id,
         bool? Locked,
         bool? Enabled,
         string UpdateFrequency,
         double? MaxSpeed,
         int? PowerSavingThreshold,
         int? StandbyThreshold
-    ) : IEScooterDesiredProperties;
+    ) : IEScooterProperties;
 
     public record EScooterReportedDto(
-        Guid Id,
         bool? Locked,
         bool? Enabled,
         string UpdateFrequency,
@@ -38,7 +35,7 @@ namespace DeviceEmulator.Model.Data.Download
         int? StandbyThreshold,
         double? Latitude,
         double? Longitude
-    ) : IEScooterDesiredProperties;
+    ) : IEScooterProperties;
 
-    public record EScooterTwin(EScooterDesiredDto DesiredDto, EScooterReportedDto ReportedDto);
+    public record EScooterTwin(Guid Id, EScooterDesiredDto DesiredDto, EScooterReportedDto ReportedDto);
 }

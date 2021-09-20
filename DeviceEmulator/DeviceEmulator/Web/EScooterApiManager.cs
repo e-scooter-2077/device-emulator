@@ -32,7 +32,7 @@ namespace DeviceEmulator.Model.Data.Download
         {
             return new EScooter
             {
-                Id = twin.DesiredDto.Id,
+                Id = twin.Id,
                 BatteryLevel = Percentage.FromPercentage(twin.ReportedDto.BatteryLevel ?? 99),
                 Enabled = twin.DesiredDto.Enabled ?? false,
                 Locked = twin.DesiredDto.Locked ?? true,
@@ -46,13 +46,12 @@ namespace DeviceEmulator.Model.Data.Download
 
         public async void UpdateEScooter(EScooter e, CancellationToken c)
         {
-            await _iotHubManager.UpdateDevice(ConvertEScooterToReportedDto(e), c);
+            await _iotHubManager.UpdateDevice(e.Id, ConvertEScooterToReportedDto(e), c);
         }
 
         private EScooterReportedDto ConvertEScooterToReportedDto(EScooter e)
         {
             return new EScooterReportedDto(
-                e.Id,
                 e.Locked,
                 e.Enabled,
                 e.UpdateFrequency.ToString(),

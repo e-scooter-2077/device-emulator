@@ -43,7 +43,7 @@ namespace DeviceEmulator.Web
             var desired = JsonConvert.DeserializeObject<EScooterDesiredDto>(twin.Properties.Desired.ToJson()); // TODO: Insert deviceID
             var reported = JsonConvert.DeserializeObject<EScooterReportedDto>(twin.Properties.Reported.ToJson()); // TODO: Insert deviceID
 
-            return new EScooterTwin(desired, reported);
+            return new EScooterTwin(Guid.Parse(twin.DeviceId), desired, reported);
         }
 
         public async Task<string> GetDevicePrimaryKey(Guid deviceId)
@@ -52,9 +52,8 @@ namespace DeviceEmulator.Web
             return device.Authentication.SymmetricKey.PrimaryKey;
         }
 
-        public async Task<Task> UpdateDevice(EScooterReportedDto reported, CancellationToken c)
+        public async Task<Task> UpdateDevice(Guid id, EScooterReportedDto reported, CancellationToken c)
         {
-            var id = reported.Id;
             var authMethod = new DeviceAuthenticationWithRegistrySymmetricKey(id.ToString(), await GetDevicePrimaryKey(id));
             ClientOptions options = null;
             /*var options = new ClientOptions
