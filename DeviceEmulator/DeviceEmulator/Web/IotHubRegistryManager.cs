@@ -1,4 +1,5 @@
 ﻿using DeviceEmulator.Model.Data.Download;
+using EasyDesk.Tools;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.Shared;
@@ -40,8 +41,8 @@ namespace DeviceEmulator.Web
 
         private EScooterTwin MapIoTHubTwinToEScooterTwin(Twin twin)
         {
-            var desired = JsonConvert.DeserializeObject<EScooterDesiredDto>(twin.Properties.Desired.ToJson()); // TODO: Insert deviceID
-            var reported = JsonConvert.DeserializeObject<EScooterReportedDto>(twin.Properties.Reported.ToJson()); // TODO: Insert deviceID
+            var desired = JsonConvert.DeserializeObject<EScooterDesiredDto>(twin.Properties.Desired.ToJson());
+            var reported = JsonConvert.DeserializeObject<EScooterReportedDto>(twin.Properties.Reported.ToJson());
 
             return new EScooterTwin(Guid.Parse(twin.DeviceId), desired, reported);
         }
@@ -52,18 +53,17 @@ namespace DeviceEmulator.Web
             return device.Authentication.SymmetricKey.PrimaryKey;
         }
 
-        public async Task<Task> UpdateDevice(Guid id, EScooterReportedDto reported, CancellationToken c)
+        public async Task UpdateDevice(Guid id, EScooterReportedDto reported, CancellationToken c)
         {
-            var authMethod = new DeviceAuthenticationWithRegistrySymmetricKey(id.ToString(), await GetDevicePrimaryKey(id));
-            ClientOptions options = null;
-            /*var options = new ClientOptions
+            if (!c.IsCancellationRequested)
             {
-                ModelId = "dtmi:com:example:TemperatureController;2",
-            };*/
-            DeviceClient deviceClient = DeviceClient.Create(_hostName, authMethod, TransportType.Mqtt, options);
+                var authMethod = new DeviceAuthenticationWithRegistrySymmetricKey(id.ToString(), await GetDevicePrimaryKey(id));
+                ClientOptions options = null;
+                DeviceClient deviceClient = DeviceClient.Create(_hostName, authMethod, TransportType.Mqtt, options);
 
-            TwinCollection reportedProperties = new TwinCollection(JsonConvert.SerializeObject(reported));
-            return deviceClient.UpdateReportedPropertiesAsync(reportedProperties);
+                TwinCollection reportedProperties = new TwinCollection(JsonConvert.SerializeObject(reported));
+                await deviceClient.UpdateReportedPropertiesAsync(reportedProperties);
+            }
         }
     }
 }

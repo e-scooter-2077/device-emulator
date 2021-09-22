@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EasyDesk.CleanArchitecture.Infrastructure" Version="0.13.0" />
+    <PackageReference Include="EasyDesk.CleanArchitecture.Infrastructure" Version="0.14.0" />
     <PackageReference Include="Geolocation" Version="1.2.1" />
     <PackageReference Include="Microsoft.Azure.Devices" Version="1.35.0" />
     <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.38.0" />

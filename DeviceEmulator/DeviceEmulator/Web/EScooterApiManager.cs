@@ -33,18 +33,15 @@ namespace DeviceEmulator.Model.Data.Download
             return new EScooter
             {
                 Id = twin.Id,
-                BatteryLevel = Percentage.FromPercentage(twin.ReportedDto.BatteryLevel ?? 99),
-                Enabled = twin.DesiredDto.Enabled ?? false,
                 Locked = twin.DesiredDto.Locked ?? true,
                 MaxSpeed = Speed.FromMetersPerSecond(twin.DesiredDto.MaxSpeed ?? 10),
-                PowerSavingThreshold = Percentage.FromPercentage(twin.DesiredDto.PowerSavingThreshold ?? 20),
-                StandbyThreshold = Percentage.FromPercentage(twin.DesiredDto.StandbyThreshold ?? 10),
+                StandbyThreshold = Fraction.FromPercentage(twin.DesiredDto.StandbyThreshold ?? 10),
                 UpdateFrequency = Duration.Parse(twin.DesiredDto.UpdateFrequency ?? "0:1" /* 1 minutes*/),
-                Position = new Coordinate(twin.ReportedDto.Latitude ?? 0, twin.ReportedDto.Longitude ?? 0)
+                Unsynced = twin.ShouldUpdate()
             };
         }
 
-        public async void UpdateEScooter(EScooter e, CancellationToken c)
+        public async Task UpdateEScooter(EScooter e, CancellationToken c)
         {
             await _iotHubManager.UpdateDevice(e.Id, ConvertEScooterToReportedDto(e), c);
         }
@@ -53,14 +50,9 @@ namespace DeviceEmulator.Model.Data.Download
         {
             return new EScooterReportedDto(
                 e.Locked,
-                e.Enabled,
                 e.UpdateFrequency.ToString(),
                 e.MaxSpeed.MetersPerSecond,
-                (int)e.BatteryLevel.Base100Value,
-                (int)e.PowerSavingThreshold.Base100Value,
-                (int)e.StandbyThreshold.Base100Value,
-                e.Position.Latitude,
-                e.Position.Longitude);
+                (int)e.StandbyThreshold.Base100Value);
         }
     }
 }

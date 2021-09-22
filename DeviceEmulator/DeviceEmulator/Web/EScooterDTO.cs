@@ -6,36 +6,45 @@ using System.Threading.Tasks;
 
 namespace DeviceEmulator.Model.Data.Download
 {
-    public interface IEScooterProperties 
+    public interface IEScooterProperties
     {
         public bool? Locked { get; }
-        public bool? Enabled { get; }
+
         public string UpdateFrequency { get; }
+
         public double? MaxSpeed { get; }
-        public int? PowerSavingThreshold { get; }
+
         public int? StandbyThreshold { get; }
     }
 
     public record EScooterDesiredDto(
         bool? Locked,
-        bool? Enabled,
         string UpdateFrequency,
         double? MaxSpeed,
-        int? PowerSavingThreshold,
-        int? StandbyThreshold
-    ) : IEScooterProperties;
+        int? StandbyThreshold)
+        : IEScooterProperties;
 
     public record EScooterReportedDto(
         bool? Locked,
-        bool? Enabled,
         string UpdateFrequency,
         double? MaxSpeed,
-        int? BatteryLevel,
-        int? PowerSavingThreshold,
-        int? StandbyThreshold,
-        double? Latitude,
-        double? Longitude
-    ) : IEScooterProperties;
+        int? StandbyThreshold)
+        : IEScooterProperties;
 
-    public record EScooterTwin(Guid Id, EScooterDesiredDto DesiredDto, EScooterReportedDto ReportedDto);
+    public record EScooterTelemetryDto(
+        int? BatteryLevel,
+        double? Speed,
+        double? Latitude,
+        double? Longitude);
+
+    public record EScooterTwin(Guid Id, EScooterDesiredDto DesiredDto, EScooterReportedDto ReportedDto)
+    {
+        public bool ShouldUpdate()
+        {
+            return !((!DesiredDto.Locked.HasValue || DesiredDto.Locked == ReportedDto.Locked) &&
+                (DesiredDto.UpdateFrequency == null || DesiredDto.UpdateFrequency == ReportedDto.UpdateFrequency) &&
+                (!DesiredDto.StandbyThreshold.HasValue || DesiredDto.StandbyThreshold == ReportedDto.StandbyThreshold) &&
+                (!DesiredDto.MaxSpeed.HasValue || DesiredDto.MaxSpeed == ReportedDto.MaxSpeed));
+        }
+    }
 }

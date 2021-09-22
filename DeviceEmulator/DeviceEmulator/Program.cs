@@ -1,6 +1,11 @@
+using DeviceEmulator.Extensions;
 using DeviceEmulator.Model.Data.Download;
+using DeviceEmulator.Model.Values;
 using DeviceEmulator.Web;
+using EasyDesk.CleanArchitecture.Domain.Time;
 using EasyDesk.CleanArchitecture.Infrastructure.DependencyInjection;
+using EasyDesk.CleanArchitecture.Infrastructure.Time;
+using Geolocation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -24,6 +29,7 @@ namespace DeviceEmulator
                     services.AddConfigAsSingleton<IotHubConfiguration>(hostContext.Configuration);
                     services.AddSingleton<IotHubRegistryManager>();
                     services.AddSingleton<EScooterApiManager>();
+                    services.AddDateTimeProvider(hostContext.Configuration);
                     services.AddHostedService<Worker>();
                 });
     }
