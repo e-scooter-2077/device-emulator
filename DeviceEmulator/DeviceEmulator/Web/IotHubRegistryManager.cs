@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Message = Microsoft.Azure.Devices.Client.Message;
 using TransportType = Microsoft.Azure.Devices.Client.TransportType;
 
 namespace DeviceEmulator.Web
@@ -29,11 +30,11 @@ namespace DeviceEmulator.Web
 
         public async Task<IEnumerable<EScooterTwin>> GetAllEScooterTwins(CancellationToken cancellationToken)
         {
-            IQuery query = _registryManager.CreateQuery("SELECT * FROM devices WHERE tags.type = 'EScooter'");
-            List<EScooterTwin> result = new();
+            var query = _registryManager.CreateQuery("SELECT * FROM devices WHERE tags.type = 'EScooter'");
+            var result = new List<EScooterTwin>();
             while (query.HasMoreResults && !cancellationToken.IsCancellationRequested)
             {
-                IEnumerable<Twin> page = await query.GetNextAsTwinAsync();
+                var page = await query.GetNextAsTwinAsync();
                 result.AddRange(page.Select(MapIoTHubTwinToEScooterTwin));
             }
             return result;
@@ -47,23 +48,40 @@ namespace DeviceEmulator.Web
             return new EScooterTwin(Guid.Parse(twin.DeviceId), desired, reported);
         }
 
-        public async Task<string> GetDevicePrimaryKey(Guid deviceId)
+        private async Task<string> GetDevicePrimaryKey(Guid deviceId, CancellationToken c)
         {
-            var device = await _registryManager.GetDeviceAsync(deviceId.ToString());
+            var device = await _registryManager.GetDeviceAsync(deviceId.ToString(), c);
             return device.Authentication.SymmetricKey.PrimaryKey;
         }
 
         public async Task UpdateDevice(Guid id, EScooterReportedDto reported, CancellationToken c)
         {
-            if (!c.IsCancellationRequested)
-            {
-                var authMethod = new DeviceAuthenticationWithRegistrySymmetricKey(id.ToString(), await GetDevicePrimaryKey(id));
-                ClientOptions options = null;
-                DeviceClient deviceClient = DeviceClient.Create(_hostName, authMethod, TransportType.Mqtt, options);
+            var deviceClient = await GetDeviceClient(id, c);
+            var reportedProperties = new TwinCollection(JsonConvert.SerializeObject(reported));
+            await deviceClient.UpdateReportedPropertiesAsync(reportedProperties, c);
+        }
 
-                TwinCollection reportedProperties = new TwinCollection(JsonConvert.SerializeObject(reported));
-                await deviceClient.UpdateReportedPropertiesAsync(reportedProperties);
-            }
+        private async Task<DeviceClient> GetDeviceClient(Guid id, CancellationToken c, ClientOptions options = null)
+        {
+            var authMethod = new DeviceAuthenticationWithRegistrySymmetricKey(id.ToString(), await GetDevicePrimaryKey(id,c));
+            return DeviceClient.Create(_hostName, authMethod, TransportType.Mqtt, options);
+        }
+
+        public async Task SendTelemetry(Guid id, EScooterTelemetryDto telemetry, CancellationToken c)
+        {
+            var deviceClient = await GetDeviceClient(id, c);
+            var message = CreateMessageFromJson(JsonConvert.SerializeObject(telemetry));
+            await deviceClient.SendEventAsync(message, c);
+        }
+
+        private Message CreateMessageFromJson(string jsonSerializedTelemetry, Encoding encoding = default)
+        {
+            var messageEncoding = encoding ?? Encoding.UTF8;
+            return new Message(messageEncoding.GetBytes(jsonSerializedTelemetry))
+            {
+                ContentEncoding = messageEncoding.WebName,
+                ContentType = "application/json",
+            };
         }
     }
 }

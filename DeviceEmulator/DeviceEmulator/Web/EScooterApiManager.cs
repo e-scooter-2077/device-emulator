@@ -46,6 +46,11 @@ namespace DeviceEmulator.Model.Data.Download
             await _iotHubManager.UpdateDevice(e.Id, ConvertEScooterToReportedDto(e), c);
         }
 
+        public async Task SendTelemetry(EScooter e, CancellationToken c)
+        {
+            await _iotHubManager.SendTelemetry(e.Id, ConvertEScooterToTelemetryDto(e), c);
+        }
+
         private EScooterReportedDto ConvertEScooterToReportedDto(EScooter e)
         {
             return new EScooterReportedDto(
@@ -53,6 +58,15 @@ namespace DeviceEmulator.Model.Data.Download
                 e.UpdateFrequency.ToString(),
                 e.MaxSpeed.MetersPerSecond,
                 (int)e.StandbyThreshold.Base100Value);
+        }
+
+        private EScooterTelemetryDto ConvertEScooterToTelemetryDto(EScooter e)
+        {
+            return new EScooterTelemetryDto(
+                e.BatteryLevel.Base100ValueRounded,
+                e.Speed.MetersPerSecond,
+                e.Position.Latitude,
+                e.Position.Longitude);
         }
     }
 }
