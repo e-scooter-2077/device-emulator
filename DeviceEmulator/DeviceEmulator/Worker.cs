@@ -35,7 +35,6 @@ namespace DeviceEmulator
                 },
                 EScooterTelemetryCallback = async (EScooter e, CancellationToken c) =>
                 {
-                    // TODO: Send Telemetry
                     await apiManager.SendTelemetry(e, c);
                     Console.WriteLine("Telemetry sent:");
                     Console.WriteLine(e);
