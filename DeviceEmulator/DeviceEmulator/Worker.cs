@@ -29,7 +29,7 @@ namespace DeviceEmulator
                 EScooterUpdatedCallback = async (EScooter e, CancellationToken c) =>
                 {
                     await apiManager.UpdateEScooter(e, c);
-                    Console.WriteLine("Property update sent:");
+                    Console.WriteLine($"[{e.Id}] Property update sent:");
                     Console.WriteLine(JsonConvert.SerializeObject(apiManager.ConvertEScooterToReportedDto(e), Formatting.Indented));
                     Console.WriteLine();
                     return Nothing.Value;
@@ -37,7 +37,7 @@ namespace DeviceEmulator
                 EScooterTelemetryCallback = async (EScooter e, CancellationToken c) =>
                 {
                     await apiManager.SendTelemetry(e, c);
-                    Console.WriteLine("Telemetry sent:");
+                    Console.WriteLine($"[{e.Id}] Telemetry sent:");
                     Console.WriteLine(JsonConvert.SerializeObject(apiManager.ConvertEScooterToTelemetryDto(e), Formatting.Indented));
                     Console.WriteLine();
                     return Nothing.Value;
