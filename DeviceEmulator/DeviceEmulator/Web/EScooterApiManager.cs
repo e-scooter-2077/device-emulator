@@ -35,7 +35,6 @@ namespace DeviceEmulator.Model.Data.Download
                 Id = twin.Id,
                 Locked = twin.DesiredDto.Locked ?? true,
                 MaxSpeed = Speed.FromMetersPerSecond(twin.DesiredDto.MaxSpeed ?? 10),
-                StandbyThreshold = Fraction.FromPercentage(twin.DesiredDto.StandbyThreshold ?? 10),
                 UpdateFrequency = Duration.Parse(twin.DesiredDto.UpdateFrequency ?? "0:1" /* 1 minutes*/),
                 Unsynced = twin.ShouldUpdate()
             };
@@ -46,13 +45,13 @@ namespace DeviceEmulator.Model.Data.Download
             await _iotHubManager.UpdateDevice(e.Id, ConvertEScooterToReportedDto(e), c);
         }
 
-        private EScooterReportedDto ConvertEScooterToReportedDto(EScooter e)
+        public EScooterReportedDto ConvertEScooterToReportedDto(EScooter e)
         {
             return new EScooterReportedDto(
                 e.Locked,
                 e.UpdateFrequency.ToString(),
                 e.MaxSpeed.MetersPerSecond,
-                (int)e.StandbyThreshold.Base100Value);
+                e.Standby);
         }
     }
 }

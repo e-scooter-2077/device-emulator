@@ -22,11 +22,11 @@ namespace DeviceEmulator.Model.Emulation
     {
         private static readonly Distance _distancePerBatteryPercent = Distance.FromMeters(450);
 
-        public AsyncFunc<CancellationToken, IEnumerable<EScooter>> EscooterListLoader { get; init; } = async _ => Enumerable.Empty<EScooter>();
+        public AsyncFunc<CancellationToken, IEnumerable<EScooter>> EscooterListLoader { get; init; } = _ => Task.FromResult(Enumerable.Empty<EScooter>());
 
-        public AsyncFunc<EScooter, CancellationToken, Nothing> EScooterUpdatedCallback { get; init; } = async (_, _) => Nothing.Value;
+        public AsyncFunc<EScooter, CancellationToken, Nothing> EScooterUpdatedCallback { get; init; } = (_, _) => Task.FromResult(Nothing.Value);
 
-        public AsyncFunc<EScooter, CancellationToken, Nothing> EScooterTelemetryCallback { get; init; } = async (_, _) => Nothing.Value;
+        public AsyncFunc<EScooter, CancellationToken, Nothing> EScooterTelemetryCallback { get; init; } = (_, _) => Task.FromResult(Nothing.Value);
 
         public EScooterEmulator(ITimestampProvider timestampProvider)
         {

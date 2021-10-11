@@ -13,22 +13,19 @@ namespace DeviceEmulator.Model.Data.Download
         public string UpdateFrequency { get; }
 
         public double? MaxSpeed { get; }
-
-        public int? StandbyThreshold { get; }
     }
 
     public record EScooterDesiredDto(
         bool? Locked,
         string UpdateFrequency,
-        double? MaxSpeed,
-        int? StandbyThreshold)
+        double? MaxSpeed)
         : IEScooterProperties;
 
     public record EScooterReportedDto(
         bool? Locked,
         string UpdateFrequency,
         double? MaxSpeed,
-        int? StandbyThreshold)
+        bool? Standby)
         : IEScooterProperties;
 
     public record EScooterTelemetryDto(
@@ -43,7 +40,6 @@ namespace DeviceEmulator.Model.Data.Download
         {
             return !((!DesiredDto.Locked.HasValue || DesiredDto.Locked == ReportedDto.Locked) &&
                 (DesiredDto.UpdateFrequency == null || DesiredDto.UpdateFrequency == ReportedDto.UpdateFrequency) &&
-                (!DesiredDto.StandbyThreshold.HasValue || DesiredDto.StandbyThreshold == ReportedDto.StandbyThreshold) &&
                 (!DesiredDto.MaxSpeed.HasValue || DesiredDto.MaxSpeed == ReportedDto.MaxSpeed));
         }
     }

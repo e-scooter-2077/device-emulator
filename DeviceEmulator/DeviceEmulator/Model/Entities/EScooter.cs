@@ -19,7 +19,8 @@ namespace DeviceEmulator.Model.Entities
         public Duration UpdateFrequency { get; init; }
         public Speed MaxSpeed { get; init; }
         public Fraction BatteryLevel { get; init; } = Fraction.FromPercentage(100);
-        public Fraction StandbyThreshold { get; init; }
+        public bool Standby { get; init; } = false;
         public Coordinate Position { get; init; } = new Coordinate(44.143043, 12.247474);  // Cesena: 44.143043, 12.247474
+        public Fraction StandbyThreshold { get; init; } = Fraction.FromPercentage(5);
     }
 }

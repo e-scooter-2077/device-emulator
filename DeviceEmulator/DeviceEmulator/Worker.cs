@@ -6,6 +6,7 @@ using EasyDesk.CleanArchitecture.Domain.Time;
 using EasyDesk.Tools;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace DeviceEmulator
                 {
                     await apiManager.UpdateEScooter(e, c);
                     Console.WriteLine("Property update sent:");
-                    Console.WriteLine(e);
+                    Console.WriteLine(JsonConvert.SerializeObject(apiManager.ConvertEScooterToReportedDto(e), Formatting.Indented));
                     Console.WriteLine();
                     return Nothing.Value;
                 },
