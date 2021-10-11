@@ -141,11 +141,7 @@ namespace DeviceEmulator.Model.Emulation
                 };
             }
 
-            telemetryUpdate = false;
-            if (_timestampProvider.DurationSince(previous.LastTelemetryUpdate) >= newScooter.UpdateFrequency)
-            {
-                telemetryUpdate = true;
-            }
+            telemetryUpdate = _timestampProvider.DurationSince(previous.LastTelemetryUpdate) >= newScooter.UpdateFrequency;
             return new EScooterStatus(
                     newScooter,
                     _timestampProvider.Now,
