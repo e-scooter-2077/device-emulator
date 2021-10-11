@@ -63,7 +63,7 @@ namespace DeviceEmulator.Web
 
         private async Task<DeviceClient> GetDeviceClient(Guid id, CancellationToken c, ClientOptions options = null)
         {
-            var authMethod = new DeviceAuthenticationWithRegistrySymmetricKey(id.ToString(), await GetDevicePrimaryKey(id,c));
+            var authMethod = new DeviceAuthenticationWithRegistrySymmetricKey(id.ToString(), await GetDevicePrimaryKey(id, c));
             return DeviceClient.Create(_hostName, authMethod, TransportType.Mqtt, options);
         }
 

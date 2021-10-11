@@ -51,7 +51,7 @@ namespace DeviceEmulator
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 await _emulator.EmulateIteration(stoppingToken);
-                await Task.Delay(20 * 1000, stoppingToken);
+                await Task.Delay(1000, stoppingToken);
             }
         }
     }

@@ -54,6 +54,7 @@ namespace DeviceEmulator.Model.Emulation
                     await EScooterTelemetryCallback(newStatus.Scooter, stoppingToken);
                 }
             });
+
             await Task.WhenAll(tasks);
         }
 
@@ -83,7 +84,7 @@ namespace DeviceEmulator.Model.Emulation
                 {
                     newScooter = newScooter with
                     {
-                        Speed = Speed.FromKilometersPerHour(Math.Max(newScooter.Speed.KilometersPerHour - 5, 0))
+                        Acceleration = Acceleration.FromKilometersPerHourPerSecond(-5)
                     };
                 }
                 else
@@ -93,24 +94,29 @@ namespace DeviceEmulator.Model.Emulation
                     {
                         newScooter = newScooter with
                         {
-                            Speed = newScooter.Speed * 0.1
+                            Speed = newScooter.Speed * 0.1,
+                            Acceleration = Acceleration.FromMetersPerSecondSquared(1)
                         };
                     }
                     else if (randomDecision < 0.6)
                     {
                         newScooter = newScooter with
                         {
-                            Speed = newScooter.Speed * 1.1
+                            Acceleration = Acceleration.FromKilometersPerHourPerSecond(1.5)
                         };
                     }
                     else
                     {
                         newScooter = newScooter with
                         {
-                            Speed = Speed.FromKilometersPerHour(Math.Max(0, newScooter.Speed.KilometersPerHour + 5 * (random.NextDouble() - 0.5)))
+                            Acceleration = Acceleration.FromKilometersPerHourPerSecond(random.NextDouble() - 0.5)
                         };
                     }
                 }
+                newScooter = newScooter with
+                {
+                    Speed = newScooter.Speed + newScooter.Acceleration * durationSinceLastStatusUpdate.AsTimeSpan
+                };
             }
             else
             {

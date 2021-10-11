@@ -14,6 +14,7 @@ namespace DeviceEmulator.Model.Entities
         public Guid Id { get; init; }
         public bool Unsynced { get; init; }
         public bool Locked { get; init; }
+        public Acceleration Acceleration { get; init; } = 0;
         public Speed Speed { get; init; } = 0;
         public Direction Direction { get; init; } = Direction.East;
         public Duration UpdateFrequency { get; init; }
