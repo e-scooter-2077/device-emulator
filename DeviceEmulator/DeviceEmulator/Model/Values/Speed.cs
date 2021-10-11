@@ -50,10 +50,6 @@ namespace DeviceEmulator.Model.Values
 
         protected override void Validate(double value)
         {
-            if (value < 0)
-            {
-                throw new ArgumentException("Speed must be positive.");
-            }
         }
 
         public double MetersPerSecond => Value;

@@ -112,9 +112,10 @@ namespace DeviceEmulator.Model.Emulation
                         };
                     }
                 }
+                var delta = newScooter.Acceleration * durationSinceLastStatusUpdate.AsTimeSpan;
                 newScooter = newScooter with
                 {
-                    Speed = newScooter.Speed + newScooter.Acceleration * durationSinceLastStatusUpdate.AsTimeSpan
+                    Speed = newScooter.Speed + delta
                 };
             }
             else

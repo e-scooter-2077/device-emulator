@@ -1,15 +1,12 @@
 using DeviceEmulator.Model.Data.Download;
 using DeviceEmulator.Model.Emulation;
 using DeviceEmulator.Model.Entities;
-using DeviceEmulator.Web;
 using EasyDesk.CleanArchitecture.Domain.Time;
 using EasyDesk.Tools;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
