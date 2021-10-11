@@ -18,12 +18,14 @@ namespace DeviceEmulator
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly ITimestampProvider _timestampProvider;
         private readonly EScooterEmulator _emulator;
 
         public Worker(ILogger<Worker> logger, EScooterApiManager apiManager, ITimestampProvider timestampProvider)
         {
             _logger = logger;
-            _emulator = new EScooterEmulator(timestampProvider)
+            _timestampProvider = timestampProvider;
+            _emulator = new EScooterEmulator(_timestampProvider)
             {
                 EscooterListLoader = apiManager.FetchEScooterList,
                 EScooterUpdatedCallback = async (EScooter e, CancellationToken c) =>
@@ -49,7 +51,7 @@ namespace DeviceEmulator
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.LogInformation("Worker running at: {time}", _timestampProvider.Now);
                 await _emulator.EmulateIteration(stoppingToken);
                 await Task.Delay(1000, stoppingToken);
             }

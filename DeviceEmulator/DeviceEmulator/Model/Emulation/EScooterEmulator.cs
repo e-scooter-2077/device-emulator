@@ -33,18 +33,19 @@ namespace DeviceEmulator.Model.Emulation
             _timestampProvider = timestampProvider;
         }
 
-        private readonly ConcurrentDictionary<Guid, EScooterStatus> _escooterMap = new ConcurrentDictionary<Guid, EScooterStatus>();
+        private readonly IDictionary<Guid, EScooterStatus> _escooterMap = new Dictionary<Guid, EScooterStatus>();
         private readonly ITimestampProvider _timestampProvider;
 
         public async Task EmulateIteration(CancellationToken stoppingToken)
         {
-            var tasks = (await EscooterListLoader(stoppingToken)).Select(async scooter =>
+            foreach (EScooter scooter in await EscooterListLoader(stoppingToken))
             {
                 var telemetryUpdate = false;
-                var newStatus = _escooterMap.AddOrUpdate(
+                _escooterMap.Merge(
                     scooter.Id,
-                    _ => new EScooterStatus(scooter, _timestampProvider.Now, _timestampProvider.Now),
+                    new EScooterStatus(scooter, _timestampProvider.Now, _timestampProvider.Now),
                     (_, prev) => ComputeEScooterUpdate(scooter, prev, out telemetryUpdate));
+                var newStatus = _escooterMap[scooter.Id];
                 if (!stoppingToken.IsCancellationRequested && scooter.Unsynced)
                 {
                     await EScooterUpdatedCallback(newStatus.Scooter, stoppingToken);
@@ -53,9 +54,7 @@ namespace DeviceEmulator.Model.Emulation
                 {
                     await EScooterTelemetryCallback(newStatus.Scooter, stoppingToken);
                 }
-            });
-
-            await Task.WhenAll(tasks);
+            }
         }
 
         private EScooterStatus ComputeEScooterUpdate(EScooter iotHubScooter, EScooterStatus previous, out bool telemetryUpdate)
