@@ -44,7 +44,7 @@ namespace DeviceEmulator.Model.Emulation
                 _escooterMap.Merge(
                     scooter.Id,
                     new EScooterStatus(scooter, _timestampProvider.Now, _timestampProvider.Now),
-                    (_, prev) => ComputeEScooterUpdate(scooter, prev, out telemetryUpdate));
+                    (prev, _) => ComputeEScooterUpdate(scooter, prev, out telemetryUpdate));
                 var newStatus = _escooterMap[scooter.Id];
                 if (!stoppingToken.IsCancellationRequested && scooter.Unsynced)
                 {
