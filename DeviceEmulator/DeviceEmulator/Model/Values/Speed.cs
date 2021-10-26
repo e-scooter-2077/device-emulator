@@ -30,8 +30,6 @@ namespace DeviceEmulator.Model.Values
 
         public static Speed FromKilometersPerHour(double kilometersPerHour) => FromMetersPerSecond(kilometersPerHour / 3.6);
 
-        public static implicit operator Speed(double v) => FromMetersPerSecond(v);
-
         public static Distance operator *(Speed s, TimeSpan t) => Distance.FromMeters(s.MetersPerSecond * t.TotalSeconds);
 
         public static Speed operator *(Speed s, double multiplier) => Speed.FromMetersPerSecond(s.MetersPerSecond * multiplier);

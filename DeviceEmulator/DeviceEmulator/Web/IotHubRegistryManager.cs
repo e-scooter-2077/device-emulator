@@ -4,6 +4,7 @@ using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.Shared;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,10 @@ namespace DeviceEmulator.Web
 
         public IotHubRegistryManager(IotHubConfiguration iotHubConfiguration)
         {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
             _iotHubConfiguration = iotHubConfiguration;
             _registryManager = RegistryManager.CreateFromConnectionString(_iotHubConfiguration.ConnectionString);
             _hostName = _iotHubConfiguration.HostName;

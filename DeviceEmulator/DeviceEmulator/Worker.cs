@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DeviceEmulator
 {
-    public class Worker : BackgroundService
+    public class Worker : IHostedService
     {
         private readonly ILogger<Worker> _logger;
         private readonly ITimestampProvider _timestampProvider;
@@ -24,27 +24,32 @@ namespace DeviceEmulator
             _timestampProvider = timestampProvider;
             _emulator = new EScooterEmulator(_timestampProvider)
             {
-                EscooterListLoader = apiManager.FetchEScooterList,
-                EScooterUpdatedCallback = async (EScooter e, CancellationToken c) =>
+                EscooterListLoader = async (token) => await apiManager.FetchEScooterList(token),
+                EScooterUpdatedCallback = async (EScooter prev, EScooter next, CancellationToken c) =>
                 {
-                    await apiManager.UpdateEScooter(e, c);
-                    Console.WriteLine($"[{e.Id}] Property update sent:");
-                    Console.WriteLine(JsonConvert.SerializeObject(apiManager.ConvertEScooterToReportedDto(e), Formatting.Indented));
-                    Console.WriteLine();
-                    return Nothing.Value;
+                    if (apiManager.ShouldUpdateReportedProperties(prev, next))
+                    {
+                        await apiManager.UpdateEScooter(next, c);
+                        Console.WriteLine($"[{next.Id}] Property update sent:");
+                        Console.WriteLine(JsonConvert.SerializeObject(apiManager.ConvertEScooterToReportedDto(next), Formatting.Indented));
+                        Console.WriteLine();
+                    }
                 },
-                EScooterTelemetryCallback = async (EScooter e, CancellationToken c) =>
+                EScooterTelemetryCallback = async (EScooter prev, EScooter next, CancellationToken c) =>
                 {
-                    await apiManager.SendTelemetry(e, c);
-                    Console.WriteLine($"[{e.Id}] Telemetry sent:");
-                    Console.WriteLine(JsonConvert.SerializeObject(apiManager.ConvertEScooterToTelemetryDto(e), Formatting.Indented));
+                    await apiManager.SendTelemetry(next, c);
+                    Console.WriteLine($"[{next.Id}] Telemetry sent:");
+                    Console.WriteLine(JsonConvert.SerializeObject(apiManager.ConvertEScooterToTelemetryDto(next), Formatting.Indented));
                     Console.WriteLine();
-                    return Nothing.Value;
                 }
             };
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task StartAsync(CancellationToken cancellationToken) => await ExecuteAsync(cancellationToken);
+
+        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+        protected async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {

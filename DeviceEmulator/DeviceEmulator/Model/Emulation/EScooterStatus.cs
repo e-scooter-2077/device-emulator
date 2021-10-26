@@ -9,5 +9,52 @@ using System.Threading.Tasks;
 
 namespace DeviceEmulator.Model.Emulation
 {
-    public record EScooterStatus(EScooter Scooter, Timestamp LastStatusUpdate, Timestamp LastTelemetryUpdate);
+    public class EScooterStatus
+    {
+        public EScooterStatus(
+            EScooter scooter,
+            Timestamp lastStatusUpdate,
+            Timestamp lastTelemetryUpdate)
+        {
+            Scooter = scooter ?? throw new ArgumentNullException(nameof(scooter));
+            LastStatusUpdate = lastStatusUpdate ?? throw new ArgumentNullException(nameof(lastStatusUpdate));
+            LastTelemetryUpdate = lastTelemetryUpdate ?? throw new ArgumentNullException(nameof(lastTelemetryUpdate));
+        }
+
+        public EScooter Scooter { get; private set; }
+
+        public Timestamp LastStatusUpdate { get; private set; }
+
+        public Timestamp LastTelemetryUpdate { get; private set; }
+
+        public void Update(Timestamp now)
+        {
+            if (now is null)
+            {
+                throw new ArgumentNullException(nameof(now));
+            }
+            Scooter = Scooter.SimulateRandomUsage(Duration.FromTimeOffset(now - LastStatusUpdate));
+            LastStatusUpdate = now;
+        }
+
+        public bool TelemetryCheck(Timestamp now)
+        {
+            if (Duration.FromTimeOffset(now - LastTelemetryUpdate) >= Scooter.UpdateFrequency)
+            {
+                LastTelemetryUpdate = now;
+                return true;
+            }
+            return false;
+        }
+
+        public void UpdateFromNewSettings(ScooterSettings settings)
+        {
+            Scooter = Scooter with
+            {
+                Locked = settings.Locked ?? Scooter.Locked,
+                DesiredMaxSpeed = settings.MaxSpeed ?? Scooter.MaxSpeed,
+                UpdateFrequency = settings.UpdateFrequency ?? Scooter.UpdateFrequency
+            };
+        }
+    }
 }

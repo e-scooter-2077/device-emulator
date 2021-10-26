@@ -1,4 +1,10 @@
-﻿using System;
+﻿using DeviceEmulator.Model.Emulation;
+using DeviceEmulator.Model.Entities;
+using DeviceEmulator.Model.Values;
+using EasyDesk.Tools.Options;
+using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
+using Geolocation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,11 +42,24 @@ namespace DeviceEmulator.Model.Data.Download
 
     public record EScooterTwin(Guid Id, EScooterDesiredDto DesiredDto, EScooterReportedDto ReportedDto)
     {
-        public bool ShouldUpdate()
+        public bool IsUnsynced()
         {
-            return !((!DesiredDto.Locked.HasValue || DesiredDto.Locked == ReportedDto.Locked) &&
-                (DesiredDto.UpdateFrequency == null || DesiredDto.UpdateFrequency == ReportedDto.UpdateFrequency) &&
-                (!DesiredDto.MaxSpeed.HasValue || DesiredDto.MaxSpeed == ReportedDto.MaxSpeed));
+            return !ReportedDto.Locked.HasValue ||
+                   ReportedDto.UpdateFrequency is null ||
+                   !ReportedDto.MaxSpeed.HasValue ||
+                   (DesiredDto.Locked.HasValue && DesiredDto.Locked != ReportedDto.Locked) ||
+                   (ReportedDto.UpdateFrequency is not null && DesiredDto.UpdateFrequency != ReportedDto.UpdateFrequency) ||
+                   (DesiredDto.MaxSpeed.HasValue && DesiredDto.MaxSpeed != ReportedDto.MaxSpeed);
+        }
+
+        public ScooterSettings ToEScooterSettings()
+        {
+            return new ScooterSettings(
+                Id: Id,
+                Unsynced: IsUnsynced(),
+                Locked: DesiredDto.Locked,
+                UpdateFrequency: Duration.Parse(DesiredDto.UpdateFrequency),
+                MaxSpeed: DesiredDto.MaxSpeed.AsOption().Select(s => Speed.FromMetersPerSecond(s)).OrElseNull());
         }
     }
 }

@@ -20,13 +20,11 @@ namespace DeviceEmulator.Model.Emulation
 {
     public class EScooterEmulator
     {
-        private static readonly Distance _distancePerBatteryPercent = Distance.FromMeters(450);
+        public AsyncFunc<CancellationToken, IEnumerable<ScooterSettings>> EscooterListLoader { get; init; } = _ => Task.FromResult(Enumerable.Empty<ScooterSettings>());
 
-        public AsyncFunc<CancellationToken, IEnumerable<EScooter>> EscooterListLoader { get; init; } = _ => Task.FromResult(Enumerable.Empty<EScooter>());
+        public AsyncAction<EScooter, EScooter, CancellationToken> EScooterUpdatedCallback { get; init; } = (_, _, _) => Task.FromResult(Nothing.Value);
 
-        public AsyncFunc<EScooter, CancellationToken, Nothing> EScooterUpdatedCallback { get; init; } = (_, _) => Task.FromResult(Nothing.Value);
-
-        public AsyncFunc<EScooter, CancellationToken, Nothing> EScooterTelemetryCallback { get; init; } = (_, _) => Task.FromResult(Nothing.Value);
+        public AsyncAction<EScooter, EScooter, CancellationToken> EScooterTelemetryCallback { get; init; } = (_, _, _) => Task.FromResult(Nothing.Value);
 
         public EScooterEmulator(ITimestampProvider timestampProvider)
         {
@@ -38,129 +36,36 @@ namespace DeviceEmulator.Model.Emulation
 
         public async Task EmulateIteration(CancellationToken stoppingToken)
         {
-            foreach (EScooter scooter in await EscooterListLoader(stoppingToken))
+            var scooters = await EscooterListLoader(stoppingToken);
+            foreach (ScooterSettings settings in scooters)
             {
-                var telemetryUpdate = false;
-                _escooterMap.Merge(
-                    scooter.Id,
-                    new EScooterStatus(scooter, _timestampProvider.Now, _timestampProvider.Now),
-                    (prev, _) => ComputeEScooterUpdate(scooter, prev, out telemetryUpdate));
-                var newStatus = _escooterMap[scooter.Id];
-                if (!stoppingToken.IsCancellationRequested && scooter.Unsynced)
+                if (!_escooterMap.ContainsKey(settings.Id))
                 {
-                    await EScooterUpdatedCallback(newStatus.Scooter, stoppingToken);
+                    _escooterMap[settings.Id] = new EScooterStatus(settings.ToEScooterWithDefaults(), _timestampProvider.Now, _timestampProvider.Now);
+                    Console.WriteLine($"Added device: [{settings.Id}] with settings:\n{settings}");
                 }
-                if (!stoppingToken.IsCancellationRequested && telemetryUpdate)
+                if (settings.Unsynced)
                 {
-                    await EScooterTelemetryCallback(newStatus.Scooter, stoppingToken);
+                    var prev = _escooterMap[settings.Id].Scooter;
+                    _escooterMap[settings.Id].UpdateFromNewSettings(settings);
+                    await EScooterUpdatedCallback(prev, _escooterMap[settings.Id].Scooter, stoppingToken);
                 }
             }
-        }
 
-        private EScooterStatus ComputeEScooterUpdate(EScooter iotHubScooter, EScooterStatus previous, out bool telemetryUpdate)
-        {
-            var durationSinceLastStatusUpdate = _timestampProvider.DurationSince(previous.LastStatusUpdate);
-            var newScooter = previous.Scooter;
-
-            if (iotHubScooter.Unsynced)
+            foreach (EScooterStatus scooterStatus in _escooterMap.Values)
             {
-                // Update new with emulated data
-                newScooter = iotHubScooter with
-                {
-                    BatteryLevel = previous.Scooter.BatteryLevel,
-                    Direction = previous.Scooter.Direction,
-                    Position = previous.Scooter.Position,
-                    Speed = previous.Scooter.Speed,
-                    Unsynced = false
-                };
-            }
+                var previous = scooterStatus.Scooter;
+                scooterStatus.Update(_timestampProvider.Now);
 
-            var random = new Random();
-
-            if (!newScooter.Locked && newScooter.BatteryLevel.Base100ValueRounded > 0)
-            {
-                if (newScooter.BatteryLevel < newScooter.StandbyThreshold)
+                if (!stoppingToken.IsCancellationRequested)
                 {
-                    newScooter = newScooter with
-                    {
-                        Acceleration = Acceleration.FromKilometersPerHourPerSecond(-5)
-                    };
+                    await EScooterUpdatedCallback(previous, scooterStatus.Scooter, stoppingToken);
                 }
-                else
+                if (!stoppingToken.IsCancellationRequested && scooterStatus.TelemetryCheck(_timestampProvider.Now))
                 {
-                    var randomDecision = random.NextDouble();
-                    if (randomDecision < 0.1)
-                    {
-                        newScooter = newScooter with
-                        {
-                            Speed = newScooter.Speed * 0.1,
-                            Acceleration = Acceleration.FromMetersPerSecondSquared(1)
-                        };
-                    }
-                    else if (randomDecision < 0.6)
-                    {
-                        newScooter = newScooter with
-                        {
-                            Acceleration = Acceleration.FromKilometersPerHourPerSecond(1.5)
-                        };
-                    }
-                    else
-                    {
-                        newScooter = newScooter with
-                        {
-                            Acceleration = Acceleration.FromKilometersPerHourPerSecond(random.NextDouble() - 0.5)
-                        };
-                    }
+                    await EScooterTelemetryCallback(previous, scooterStatus.Scooter, stoppingToken);
                 }
-                var delta = newScooter.Acceleration * durationSinceLastStatusUpdate.AsTimeSpan;
-                newScooter = newScooter with
-                {
-                    Speed = newScooter.Speed + delta
-                };
             }
-            else
-            {
-                newScooter = newScooter with
-                {
-                    Speed = random.NextDouble() > 0.7 ? 0.01 : 0 // E-Scooters tend to be moved manually
-                };
-            }
-
-            newScooter = newScooter with
-            {
-                Speed = newScooter.Speed < newScooter.MaxSpeed ? newScooter.Speed : newScooter.MaxSpeed
-            };
-
-            if (newScooter.Speed > Speed.FromKilometersPerHour(0))
-            {
-                newScooter = newScooter with
-                {
-                    Direction = random.NextDouble() > 0.2 ? Direction.FromDegrees(newScooter.Direction.Degrees + (random.NextDouble() > 0.4 ? 10 : -11)) : newScooter.Direction.Degrees
-                };
-                var newPosition = MoveScooter(newScooter, durationSinceLastStatusUpdate);
-                var traveledMeters = GeoCalculator.GetDistance(newScooter.Position, newPosition, decimalPlaces: 2, DistanceUnit.Meters);
-                var batteryConsumedPercentage = traveledMeters / _distancePerBatteryPercent.Meters;
-                newScooter = newScooter with
-                {
-                    Position = newPosition,
-                    BatteryLevel = Fraction.FromPercentage(newScooter.BatteryLevel.Base100Value - batteryConsumedPercentage)
-                };
-            }
-
-            telemetryUpdate = _timestampProvider.DurationSince(previous.LastTelemetryUpdate) >= newScooter.UpdateFrequency;
-            return new EScooterStatus(
-                    newScooter,
-                    _timestampProvider.Now,
-                    telemetryUpdate ? _timestampProvider.Now : previous.LastTelemetryUpdate);
-        }
-
-        public Coordinate MoveScooter(EScooter scooter, Duration movementDuration)
-        {
-            return scooter.Position.MoveBy(
-                scooter.Direction,
-                Distance.Min(
-                    scooter.Speed * movementDuration.AsTimeSpan,
-                    Distance.FromMeters(scooter.BatteryLevel.Base100Value * _distancePerBatteryPercent.Meters)));
         }
     }
 }
