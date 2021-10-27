@@ -58,8 +58,8 @@ namespace DeviceEmulator.Model.Data.Download
                 Id: Id,
                 Unsynced: IsUnsynced(),
                 Locked: DesiredDto.Locked,
-                UpdateFrequency: Duration.Parse(DesiredDto.UpdateFrequency),
-                MaxSpeed: DesiredDto.MaxSpeed.AsOption().Select(s => Speed.FromMetersPerSecond(s)).OrElseNull());
+                UpdateFrequency: DesiredDto.UpdateFrequency.AsOption().Map(s => Duration.Parse(s)).OrElseNull(),
+                MaxSpeed: DesiredDto.MaxSpeed.AsOption().Map(s => Speed.FromMetersPerSecond(s)).OrElseNull());
         }
     }
 }
