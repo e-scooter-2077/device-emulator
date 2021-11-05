@@ -20,7 +20,7 @@ namespace DeviceEmulator.Model.Emulation
 {
     public class EScooterEmulator
     {
-        public AsyncFunc<CancellationToken, IEnumerable<ScooterSettings>> EscooterListLoader { get; init; } = _ => Task.FromResult(Enumerable.Empty<ScooterSettings>());
+        public AsyncFunc<CancellationToken, IEnumerable<ScooterSettings>> EscooterSettingsLoader { get; init; } = _ => Task.FromResult(Enumerable.Empty<ScooterSettings>());
 
         public AsyncAction<EScooter, EScooter, CancellationToken> EScooterUpdatedCallback { get; init; } = (_, _, _) => Task.FromResult(Nothing.Value);
 
@@ -36,13 +36,14 @@ namespace DeviceEmulator.Model.Emulation
 
         public async Task EmulateIteration(CancellationToken stoppingToken)
         {
-            var scooters = await EscooterListLoader(stoppingToken);
+            var scooters = await EscooterSettingsLoader(stoppingToken);
             foreach (ScooterSettings settings in scooters)
             {
                 if (!_escooterMap.ContainsKey(settings.Id))
                 {
                     _escooterMap[settings.Id] = new EScooterStatus(settings.ToEScooterWithDefaults(), _timestampProvider.Now, _timestampProvider.Now);
                     Console.WriteLine($"Added device: [{settings.Id}] with settings:\n{settings}");
+                    await EScooterUpdatedCallback(null, _escooterMap[settings.Id].Scooter, stoppingToken);
                 }
                 if (settings.Unsynced)
                 {

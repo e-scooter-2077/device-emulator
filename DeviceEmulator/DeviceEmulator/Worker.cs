@@ -24,10 +24,10 @@ namespace DeviceEmulator
             _timestampProvider = timestampProvider;
             _emulator = new EScooterEmulator(_timestampProvider)
             {
-                EscooterListLoader = async (token) => await apiManager.FetchEScooterList(token),
+                EscooterSettingsLoader = async (token) => await apiManager.FetchEScooterList(token),
                 EScooterUpdatedCallback = async (EScooter prev, EScooter next, CancellationToken c) =>
                 {
-                    if (apiManager.ShouldUpdateReportedProperties(prev, next))
+                    if (prev is null || apiManager.ShouldUpdateReportedProperties(prev, next))
                     {
                         await apiManager.UpdateEScooter(next, c);
                         Console.WriteLine($"[{next.Id}] Property update sent:");

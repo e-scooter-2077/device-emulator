@@ -28,15 +28,17 @@ namespace DeviceEmulator.Model.Entities
         public Speed MaxSpeed => Standby ? StandbyMaxSpeed : DesiredMaxSpeed;
 
         public bool Standby => BatteryLevel <= StandbyThreshold;
+    }
 
-        public EScooter SimulateRandomUsage(Duration duration)
+    public static class EScooterExtensions
+    {
+        public static EScooter SimulateRandomUsage(this EScooter result, Duration duration)
         {
             var random = new Random();
-            var result = this;
 
-            if (!Locked && BatteryLevel.Base100ValueRounded > 0)
+            if (!result.Locked && result.BatteryLevel.Base100ValueRounded > 0)
             {
-                if (Standby)
+                if (result.Standby)
                 {
                     result = result with { Acceleration = Acceleration.FromKilometersPerHourPerSecond(-5) };
                 }
@@ -47,7 +49,7 @@ namespace DeviceEmulator.Model.Entities
                     {
                         result = result with
                         {
-                            Speed = Speed * 0.1,
+                            Speed = result.Speed * 0.1,
                             Acceleration = Acceleration.FromMetersPerSecondSquared(1)
                         };
                     }
@@ -60,8 +62,8 @@ namespace DeviceEmulator.Model.Entities
                         result = result with { Acceleration = Acceleration.FromKilometersPerHourPerSecond(random.NextDouble() - 0.5) };
                     }
                 }
-                var delta = Acceleration * duration.AsTimeSpan;
-                result = result with { Speed = Speed + delta };
+                var delta = result.Acceleration * duration.AsTimeSpan;
+                result = result with { Speed = result.Speed + delta };
             }
             else
             {
@@ -70,37 +72,37 @@ namespace DeviceEmulator.Model.Entities
 
             result = result with
             {
-                Speed = Speed < MaxSpeed ? Speed : MaxSpeed
+                Speed = result.Speed < result.MaxSpeed ? result.Speed : result.MaxSpeed
             };
 
-            if (Speed > Speed.FromKilometersPerHour(0))
+            if (result.Speed > Speed.FromKilometersPerHour(0))
             {
                 result = result with
                 {
-                    Direction = random.NextDouble() > 0.2 ? Direction.FromDegrees(Direction.Degrees + (random.NextDouble() > 0.4 ? 10 : -11)) : Direction.Degrees
+                    Direction = random.NextDouble() > 0.2 ? Direction.FromDegrees(result.Direction.Degrees + (random.NextDouble() > 0.4 ? 10 : -11)) : result.Direction.Degrees
                 };
 
-                var oldPosition = Position;
+                var oldPosition = result.Position;
                 result = result.MoveFor(duration);
-                var traveledMeters = GeoCalculator.GetDistance(oldPosition, Position, decimalPlaces: 2, DistanceUnit.Meters);
-                var batteryConsumedPercentage = traveledMeters / DistancePerBatteryPercent.Meters;
+                var traveledMeters = GeoCalculator.GetDistance(oldPosition, result.Position, decimalPlaces: 2, DistanceUnit.Meters);
+                var batteryConsumedPercentage = traveledMeters / result.DistancePerBatteryPercent.Meters;
                 result = result with
                 {
-                    BatteryLevel = Fraction.FromPercentage(BatteryLevel.Base100Value - batteryConsumedPercentage)
+                    BatteryLevel = Fraction.FromPercentage(result.BatteryLevel.Base100Value - batteryConsumedPercentage)
                 };
             }
             return result;
         }
 
-        private EScooter MoveFor(Duration movementDuration)
+        private static EScooter MoveFor(this EScooter result, Duration movementDuration)
         {
-            return this with
+            return result with
             {
-                Position = Position.MoveBy(
-                    Direction,
+                Position = result.Position.MoveBy(
+                    result.Direction,
                     Distance.Min(
-                        Speed * movementDuration.AsTimeSpan,
-                        Distance.FromMeters(BatteryLevel.Base100Value * DistancePerBatteryPercent.Meters)))
+                        result.Speed * movementDuration.AsTimeSpan,
+                        Distance.FromMeters(result.BatteryLevel.Base100Value * result.DistancePerBatteryPercent.Meters)))
             };
         }
     }

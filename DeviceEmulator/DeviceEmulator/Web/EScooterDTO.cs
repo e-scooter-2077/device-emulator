@@ -35,7 +35,7 @@ namespace DeviceEmulator.Model.Data.Download
         : IEScooterProperties;
 
     public record EScooterTelemetryDto(
-        int? BatteryLevel,
+        double? BatteryLevel,
         double? Speed,
         double? Latitude,
         double? Longitude);

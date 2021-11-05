@@ -8,7 +8,7 @@ namespace DeviceEmulator.Model.Values
 {
     public record Fraction : IComparable<Fraction>
     {
-        public int Base100ValueRounded => (int)Math.Round(Base100Value);
+        public double Base100ValueRounded => Math.Round(Base100Value, 2);
         public double Base100Value { get; }
         public double Base1Value => Base100Value / 100;
         private Fraction(double percentage)
