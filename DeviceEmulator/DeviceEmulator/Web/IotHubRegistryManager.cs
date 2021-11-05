@@ -2,6 +2,7 @@
 using EasyDesk.Tools;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Client;
+using Microsoft.Azure.Devices.Client.Exceptions;
 using Microsoft.Azure.Devices.Shared;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -76,7 +77,14 @@ namespace DeviceEmulator.Web
         {
             var deviceClient = await GetDeviceClient(id, c);
             var message = CreateMessageFromJson(JsonConvert.SerializeObject(telemetry));
-            await deviceClient.SendEventAsync(message, c);
+            try
+            {
+                await deviceClient.SendEventAsync(message, c);
+            }
+            catch (IotHubCommunicationException e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
         private Message CreateMessageFromJson(string jsonSerializedTelemetry, Encoding encoding = default)
