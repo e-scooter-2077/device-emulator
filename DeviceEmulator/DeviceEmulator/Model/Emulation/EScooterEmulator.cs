@@ -1,18 +1,9 @@
-﻿using DeviceEmulator.Extensions;
-using DeviceEmulator.Model.Entities;
-using DeviceEmulator.Model.Values;
-using DeviceEmulator.Web;
+﻿using DeviceEmulator.Model.Entities;
 using EasyDesk.CleanArchitecture.Domain.Time;
 using EasyDesk.Tools;
-using EasyDesk.Tools.Collections;
-using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
-using Geolocation;
-using Microsoft.VisualBasic;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,22 +25,25 @@ namespace DeviceEmulator.Model.Emulation
         private readonly IDictionary<Guid, EScooterStatus> _escooterMap = new Dictionary<Guid, EScooterStatus>();
         private readonly ITimestampProvider _timestampProvider;
 
-        public async Task EmulateIteration(CancellationToken stoppingToken)
+        public async Task EmulateIteration(CancellationToken stoppingToken, bool skipPolling = false)
         {
-            var scooters = await EscooterSettingsLoader(stoppingToken);
-            foreach (ScooterSettings settings in scooters)
+            if (!skipPolling)
             {
-                if (!_escooterMap.ContainsKey(settings.Id))
+                var scooters = await EscooterSettingsLoader(stoppingToken);
+                foreach (ScooterSettings settings in scooters)
                 {
-                    _escooterMap[settings.Id] = new EScooterStatus(settings.ToEScooterWithDefaults(), _timestampProvider.Now, _timestampProvider.Now);
-                    Console.WriteLine($"Added device: [{settings.Id}] with settings:\n{settings}");
-                    await EScooterUpdatedCallback(null, _escooterMap[settings.Id].Scooter, stoppingToken);
-                }
-                if (settings.Unsynced)
-                {
-                    var prev = _escooterMap[settings.Id].Scooter;
-                    _escooterMap[settings.Id].UpdateFromNewSettings(settings);
-                    await EScooterUpdatedCallback(prev, _escooterMap[settings.Id].Scooter, stoppingToken);
+                    if (!_escooterMap.ContainsKey(settings.Id))
+                    {
+                        _escooterMap[settings.Id] = new EScooterStatus(settings.ToEScooterWithDefaults(), _timestampProvider.Now, _timestampProvider.Now);
+                        Console.WriteLine($"Added device: [{settings.Id}] with settings:\n{settings}");
+                        await EScooterUpdatedCallback(null, _escooterMap[settings.Id].Scooter, stoppingToken);
+                    }
+                    if (settings.Unsynced)
+                    {
+                        var prev = _escooterMap[settings.Id].Scooter;
+                        _escooterMap[settings.Id].UpdateFromNewSettings(settings);
+                        await EScooterUpdatedCallback(prev, _escooterMap[settings.Id].Scooter, stoppingToken);
+                    }
                 }
             }
 
@@ -58,7 +52,7 @@ namespace DeviceEmulator.Model.Emulation
                 var previous = scooterStatus.Scooter;
                 scooterStatus.Update(_timestampProvider.Now);
 
-                if (!stoppingToken.IsCancellationRequested)
+                if (!stoppingToken.IsCancellationRequested && scooterStatus.Scooter != previous)
                 {
                     await EScooterUpdatedCallback(previous, scooterStatus.Scooter, stoppingToken);
                 }

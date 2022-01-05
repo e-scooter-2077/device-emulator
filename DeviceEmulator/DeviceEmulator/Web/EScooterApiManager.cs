@@ -1,14 +1,8 @@
 ﻿using DeviceEmulator.Model.Emulation;
 using DeviceEmulator.Model.Entities;
-using DeviceEmulator.Model.Values;
 using DeviceEmulator.Web;
-using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
-using Geolocation;
-using Microsoft.Azure.Devices.Client;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

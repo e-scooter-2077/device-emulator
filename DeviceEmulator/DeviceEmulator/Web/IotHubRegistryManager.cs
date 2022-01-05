@@ -1,5 +1,4 @@
 ﻿using DeviceEmulator.Model.Data.Download;
-using EasyDesk.Tools;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.Client.Exceptions;
@@ -64,7 +63,19 @@ namespace DeviceEmulator.Web
         {
             var deviceClient = await GetDeviceClient(id, c);
             var reportedProperties = new TwinCollection(JsonConvert.SerializeObject(reported));
-            await deviceClient.UpdateReportedPropertiesAsync(reportedProperties, c);
+            try
+            {
+                await deviceClient.UpdateReportedPropertiesAsync(reportedProperties, c);
+            }
+            catch (IotHubCommunicationException e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            finally
+            {
+                await deviceClient.CloseAsync();
+                deviceClient.Dispose();
+            }
         }
 
         private async Task<DeviceClient> GetDeviceClient(Guid id, CancellationToken c, ClientOptions options = null)
@@ -84,6 +95,12 @@ namespace DeviceEmulator.Web
             catch (IotHubCommunicationException e)
             {
                 Console.WriteLine(e.ToString());
+            }
+            finally
+            {
+                message.Dispose();
+                await deviceClient.CloseAsync();
+                deviceClient.Dispose();
             }
         }
 

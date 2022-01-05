@@ -2,7 +2,6 @@ using DeviceEmulator.Model.Data.Download;
 using DeviceEmulator.Model.Emulation;
 using DeviceEmulator.Model.Entities;
 using EasyDesk.CleanArchitecture.Domain.Time;
-using EasyDesk.Tools;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -51,11 +50,13 @@ namespace DeviceEmulator
 
         protected async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            int i = 0;
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", _timestampProvider.Now);
-                await _emulator.EmulateIteration(stoppingToken);
-                await Task.Delay(1000, stoppingToken);
+                await _emulator.EmulateIteration(stoppingToken, skipPolling: i != 0);
+                await Task.Delay(5000, stoppingToken);
+                i = (i + 1) % 4;
             }
         }
     }

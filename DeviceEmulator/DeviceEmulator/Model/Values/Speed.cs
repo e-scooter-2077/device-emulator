@@ -1,9 +1,5 @@
 ﻿using EasyDesk.CleanArchitecture.Domain.Metamodel.Values;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DeviceEmulator.Model.Values
 {

@@ -1,16 +1,10 @@
-using DeviceEmulator.Extensions;
 using DeviceEmulator.Model.Data.Download;
-using DeviceEmulator.Model.Values;
 using DeviceEmulator.Web;
-using EasyDesk.CleanArchitecture.Domain.Time;
 using EasyDesk.CleanArchitecture.Infrastructure.DependencyInjection;
 using EasyDesk.CleanArchitecture.Infrastructure.Time;
-using Geolocation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DeviceEmulator
@@ -19,7 +13,15 @@ namespace DeviceEmulator
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            try
+            {
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception e) when (e is Microsoft.Azure.Devices.Client.Exceptions.IotHubException || e is TaskCanceledException || e is Microsoft.Azure.Devices.Common.Exceptions.IotHubException)
+            {
+                Console.WriteLine("Exiting...");
+                Environment.Exit(1);
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
