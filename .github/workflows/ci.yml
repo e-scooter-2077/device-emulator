@@ -12,4 +12,4 @@ jobs:
     uses: e-scooter-2077/csharp-app-ci/.github/workflows/csharp-app-ci.yml@master
     with:
       project-path: DeviceEmulator
-      test-project-path: test/DeviceEmulatorUnitTests
+      tests-project-path: test/DeviceEmulatorUnitTests
