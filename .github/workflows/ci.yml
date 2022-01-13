@@ -11,4 +11,5 @@ jobs:
   ci-cd:
     uses: e-scooter-2077/csharp-app-ci/.github/workflows/csharp-app-ci.yml@master
     with:
-      project-path: DeviceEmulator/DeviceEmulator
+      project-path: DeviceEmulator
+      test-project-path: test/DeviceEmulatorUnitTests
