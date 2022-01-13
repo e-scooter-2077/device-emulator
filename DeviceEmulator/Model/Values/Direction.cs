@@ -8,14 +8,14 @@ namespace DeviceEmulator.Model.Values
         private Direction(double rads)
         {
             var t = rads % (2 * Math.PI);
-            Radians = t < 0 ? t + 2 * Math.PI : t;
+            Radians = t < 0 ? t + (2 * Math.PI) : t;
         }
 
         public double Radians { get; }
 
         public double Degrees => Radians / Math.PI * 180;
 
-        public double ClockwiseRadiansFromNorth => (-Radians - 3 * Math.PI / 2) % (2 * Math.PI) + 2 * Math.PI;
+        public double ClockwiseRadiansFromNorth => ((-Radians - (3 * Math.PI / 2)) % (2 * Math.PI)) + (2 * Math.PI);
 
         public static Direction FromRadians(double rads) => new(rads);
 

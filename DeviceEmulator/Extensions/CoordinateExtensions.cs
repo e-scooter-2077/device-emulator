@@ -15,8 +15,8 @@ namespace DeviceEmulator.Extensions
             var earthRadius = 6371000;
             var delta = distance.Meters / earthRadius;
             var theta = direction.ClockwiseRadiansFromNorth;
-            var phi2 = Math.Asin(Math.Sin(phi1) * Math.Cos(delta) + Math.Cos(phi1) * Math.Sin(delta) * Math.Cos(theta));
-            var lambda2 = lambda1 + Math.Atan2(Math.Sin(theta) * Math.Sin(delta) * Math.Cos(phi1), Math.Cos(delta) - Math.Sin(phi1) * Math.Sin(phi2));
+            var phi2 = Math.Asin((Math.Sin(phi1) * Math.Cos(delta)) + (Math.Cos(phi1) * Math.Sin(delta) * Math.Cos(theta)));
+            var lambda2 = lambda1 + Math.Atan2(Math.Sin(theta) * Math.Sin(delta) * Math.Cos(phi1), Math.Cos(delta) - (Math.Sin(phi1) * Math.Sin(phi2)));
 
             return new Coordinate(phi2 * 180 / Math.PI, lambda2 * 180 / Math.PI);
         }
