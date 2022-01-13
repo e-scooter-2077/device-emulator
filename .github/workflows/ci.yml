@@ -1,0 +1,14 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '*'
+
+jobs:
+  ci-cd:
+    uses: e-scooter-2077/csharp-app-ci/.github/workflows/csharp-app-ci.yml@master
+    with:
+      project-path: DeviceEmulator/DeviceEmulator
