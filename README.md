@@ -1,4 +1,5 @@
 # device-emulator
+[![Continuous Integration](https://github.com/e-scooter-2077/device-emulator/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/e-scooter-2077/device-emulator/actions/workflows/ci.yml)
 [![GitHub issues](https://img.shields.io/github/issues-raw/e-scooter-2077/device-emulator?style=plastic)](https://github.com/e-scooter-2077/device-emulator/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/e-scooter-2077/device-emulator?style=plastic)](https://github.com/e-scooter-2077/device-emulator/pulls)
 [![GitHub](https://img.shields.io/github/license/e-scooter-2077/device-emulator?style=plastic)](/LICENSE)
