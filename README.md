@@ -6,6 +6,4 @@
 [![Documentation](https://img.shields.io/badge/documentation-click%20here-informational?style=plastic)](https://e-scooter-2077.github.io/documentation/implementation/index.html)
 [![Documentation](https://img.shields.io/badge/requirements-click%20here-informational?style=plastic)](https://e-scooter-2077.github.io/documentation/Device%20Emulator/Requirements.html)
 
-The Device emulator is a software that enables the usage of deviced that doesn't exists.
-
-It allows to query for new devices and randomly uses them.
+The Device emulator simulates the behavior of e-scooters in the real world, allowing us to test the system.
