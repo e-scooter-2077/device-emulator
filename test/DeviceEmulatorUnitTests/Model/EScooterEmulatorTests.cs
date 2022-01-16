@@ -4,6 +4,7 @@ using DeviceEmulator.Model.Values;
 using EasyDesk.CleanArchitecture.Domain.Time;
 using EasyDesk.CleanArchitecture.Infrastructure.Time;
 using EasyDesk.CleanArchitecture.Testing;
+using EasyDesk.Testing;
 using EasyDesk.Tools;
 using EasyDesk.Tools.Collections;
 using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
@@ -47,14 +48,7 @@ namespace DeviceEmulatorUnitTests.Model
                 EScooterUpdatedCallback = Substitute.For<AsyncAction<EScooter, EScooter, CancellationToken>>()
             };
             await sut.EmulateIteration(_cancellationToken, skipPolling: false);
-            sut.EScooterUpdatedCallback
-                .ReceivedCalls()
-                .ShouldSatisfyAllConditions(
-                    calls => calls.Count().ShouldBeInRange(1, 2),
-                    calls => calls.First().GetArguments()
-                                .ShouldSatisfyAllConditions(
-                                    args => args[0].ShouldBeNull(),
-                                    args => args[1].ShouldBeOfType<EScooter>()));
+            await sut.EScooterUpdatedCallback.Received()(Arg.Is<EScooter>(e => e == null), Arg.Any<EScooter>(), _cancellationToken);
         }
 
         [Fact]
@@ -74,21 +68,11 @@ namespace DeviceEmulatorUnitTests.Model
                 EScooterUpdatedCallback = Substitute.For<AsyncAction<EScooter, EScooter, CancellationToken>>()
             };
             await sut.EmulateIteration(_cancellationToken, skipPolling: false);
-            sut.EScooterUpdatedCallback
-                .ReceivedCalls()
-                .ShouldSatisfyAllConditions(
-                    calls => calls.Count().ShouldBeInRange(2, 3),
-                    calls => calls.First().GetArguments()
-                                .ShouldSatisfyAllConditions(
-                                    args => args[0].ShouldBeNull(),
-                                    args => args[1].ShouldSatisfyAllConditions(
-                                        s => s.ShouldNotBeNull(),
-                                        s => s.ShouldBeOfType<EScooter>())),
-                    calls => calls.Skip(1).First().GetArguments().Take(2)
-                                .ForEach(
-                                    arg => arg.ShouldSatisfyAllConditions(
-                                        s => s.ShouldNotBeNull(),
-                                        s => s.ShouldBeOfType<EScooter>())));
+            await sut.EScooterUpdatedCallback
+                .Received()(
+                Arg.Any<EScooter>(),
+                Arg.Is<EScooter>(e => e != null),
+                _cancellationToken);
         }
 
         [Fact]
@@ -109,12 +93,12 @@ namespace DeviceEmulatorUnitTests.Model
                 EScooterTelemetryCallback = Substitute.For<AsyncAction<EScooter, EScooter, CancellationToken>>()
             };
             await sut.EmulateIteration(_cancellationToken, skipPolling: false);
-            sut.EScooterTelemetryCallback
-                .DidNotReceiveWithAnyArgs();
+            await sut.EScooterTelemetryCallback
+                .DidNotReceiveWithAnyArgs()(default, default, default);
             _timeStampProvider.Set(t => Timestamp.FromUtcDateTime(t.AsDateTime + ss.UpdateFrequency.AsTimeSpan + TimeSpan.FromSeconds(1)));
             await sut.EmulateIteration(_cancellationToken, skipPolling: true);
             await sut.EScooterTelemetryCallback
-                .Received(1)(Arg.Is<EScooter>(e => e != null), Arg.Is<EScooter>(e => e != null), Arg.Is<CancellationToken>(e => e == _cancellationToken));
+                .Received(1)(Arg.Is<EScooter>(e => e != null), Arg.Is<EScooter>(e => e != null), _cancellationToken);
         }
 
         [Fact]
@@ -124,9 +108,9 @@ namespace DeviceEmulatorUnitTests.Model
             {
                 EscooterSettingsLoader = Substitute.For<AsyncFunc<CancellationToken, IEnumerable<ScooterSettings>>>()
             };
-            sut.EscooterSettingsLoader.Returns(_ => Task.FromResult(Enumerable.Empty<ScooterSettings>()));
+            sut.EscooterSettingsLoader(default).ReturnsForAnyArgs(Enumerable.Empty<ScooterSettings>());
             await sut.EmulateIteration(_cancellationToken, skipPolling: true);
-            sut.EscooterSettingsLoader.DidNotReceiveWithAnyArgs();
+            await sut.EscooterSettingsLoader.DidNotReceiveWithAnyArgs()(default);
         }
 
         [Fact]
@@ -136,13 +120,9 @@ namespace DeviceEmulatorUnitTests.Model
             {
                 EscooterSettingsLoader = Substitute.For<AsyncFunc<CancellationToken, IEnumerable<ScooterSettings>>>()
             };
-            sut.EscooterSettingsLoader.Returns(_ => Task.FromResult(Enumerable.Empty<ScooterSettings>()));
+            sut.EscooterSettingsLoader(default).ReturnsForAnyArgs(Enumerable.Empty<ScooterSettings>());
             await sut.EmulateIteration(_cancellationToken, skipPolling: false);
-            sut.EscooterSettingsLoader.ReceivedCalls()
-                .ShouldHaveSingleItem()
-                .GetArguments()
-                .ShouldHaveSingleItem()
-                .ShouldBe(_cancellationToken);
+            await sut.EscooterSettingsLoader.Received()(_cancellationToken);
         }
     }
 }
