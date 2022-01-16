@@ -29,7 +29,7 @@ namespace DeviceEmulator
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddConfigAsSingleton<IotHubConfiguration>(hostContext.Configuration);
-                    services.AddSingleton<IotHubRegistryManager>();
+                    services.AddSingleton<IIotHubRegistryManager, IotHubRegistryManager>();
                     services.AddSingleton<EScooterApiManager>();
                     services.AddTimestampProvider(hostContext.Configuration);
                     services.AddHostedService<Worker>();

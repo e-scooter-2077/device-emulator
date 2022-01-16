@@ -30,7 +30,5 @@ namespace DeviceEmulator.Model.Values
         public static Direction West => FromRadians(Math.PI);
 
         public static Direction Random => FromRadians(new Rand().NextDouble() * 2 * Math.PI);
-
-        public static implicit operator Direction(double v) => FromRadians(v);
     }
 }

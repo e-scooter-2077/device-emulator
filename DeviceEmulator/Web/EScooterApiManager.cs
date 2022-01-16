@@ -10,9 +10,9 @@ namespace DeviceEmulator.Model.Data.Download
 {
     public class EScooterApiManager
     {
-        private readonly IotHubRegistryManager _iotHubManager;
+        private readonly IIotHubRegistryManager _iotHubManager;
 
-        public EScooterApiManager(IotHubRegistryManager iotHubManager)
+        public EScooterApiManager(IIotHubRegistryManager iotHubManager)
         {
             _iotHubManager = iotHubManager;
         }

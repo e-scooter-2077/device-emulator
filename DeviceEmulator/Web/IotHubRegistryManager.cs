@@ -16,7 +16,7 @@ using TransportType = Microsoft.Azure.Devices.Client.TransportType;
 
 namespace DeviceEmulator.Web
 {
-    public class IotHubRegistryManager
+    public class IotHubRegistryManager : IIotHubRegistryManager
     {
         private readonly IotHubConfiguration _iotHubConfiguration;
         private readonly RegistryManager _registryManager;

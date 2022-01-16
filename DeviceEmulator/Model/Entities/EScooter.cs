@@ -75,7 +75,7 @@ namespace DeviceEmulator.Model.Entities
             {
                 result = result with
                 {
-                    Direction = random.NextDouble() > 0.2 ? Direction.FromDegrees(result.Direction.Degrees + (random.NextDouble() > 0.4 ? 10 : -11)) : result.Direction.Degrees
+                    Direction = Direction.FromDegrees(random.NextDouble() > 0.2 ? result.Direction.Degrees + (random.NextDouble() > 0.4 ? 10 : -11) : result.Direction.Degrees)
                 };
 
                 var oldPosition = result.Position;
