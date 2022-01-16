@@ -45,7 +45,7 @@ namespace DeviceEmulatorUnitTests.Model
             var ts = Timestamp.Now;
             var e = new EScooterStatus(_escooter, ts, ts);
             e.TelemetryCheck(ts).ShouldBeFalse();
-            var after = Timestamp.FromUtcDateTime(ts.AsDateTime.AddSeconds(_escooter.UpdateFrequency.AsTimeSpan.TotalSeconds+1));
+            var after = Timestamp.FromUtcDateTime(ts.AsDateTime.AddSeconds(_escooter.UpdateFrequency.AsTimeSpan.TotalSeconds + 1));
             e.TelemetryCheck(after).ShouldBeTrue();
         }
 
